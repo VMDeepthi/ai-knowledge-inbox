@@ -6,13 +6,13 @@ A minimal full-stack RAG application: save notes or URLs, search their meaning, 
 - Frontend: React + Vite
 - Backend: Python + FastAPI
 - Persistence: SQLite
-- Embeddings + answers: OpenAI API
+- Embeddings + answers: Google Gemini API
 - Vector search: lightweight cosine similarity over vectors stored in SQLite (keeps setup simple)
 
 ## Requirements
 - Python 3.10+
 - Node.js 18+
-- OpenAI API key
+- Google Gemini API key
 
 ## Run the backend
 ```bash
@@ -24,7 +24,7 @@ python -m venv .venv
 # source .venv/bin/activate
 pip install -r requirements.txt
 copy .env.example .env
-# Edit .env and add OPENAI_API_KEY
+# Edit .env and add GEMINI_API_KEY
 uvicorn app.main:app --reload
 ```
 Backend: http://localhost:8000  
@@ -48,11 +48,11 @@ Frontend: http://localhost:5173
 ## RAG design
 1. URL content is fetched server-side and parsed with BeautifulSoup.
 2. Text is split into overlapping character chunks (about 1,000 characters, 150 overlap).
-3. OpenAI `text-embedding-3-small` generates vectors.
+3. Google Gemini embedding model generates vector embeddings for the text chunks.
 4. Item metadata, raw text, chunks and vectors are stored in SQLite.
 5. Query embedding is compared with stored vectors using cosine similarity.
-6. The top matching chunks are sent to `gpt-4o-mini` as context.
-7. The model is instructed to answer only from context and cite source IDs. The API returns snippets and source metadata separately.
+6. The top matching chunks are sent to the Google Gemini generative model as context.
+7. The model is instructed to answer using the retrieved context and cite source IDs. The API returns relevant snippets and source metadata separately.
 
 ## Tradeoffs and production improvements
 - SQLite + in-process cosine search is intentionally small and suitable for a single-user demo. At larger scale, move to pgvector, Qdrant, Pinecone or another vector store.
@@ -62,4 +62,4 @@ Frontend: http://localhost:5173
 - URL fetching should be hardened in production: validate DNS/IP destinations and redirects to prevent SSRF. This demo blocks obvious private/local hostnames and IPs but is not a complete SSRF defense.
 
 ## Notes
-The app requires an OpenAI API key for ingestion and question answering. Never commit `.env`.
+The application requires a Gemini API key for ingestion and question answering..
